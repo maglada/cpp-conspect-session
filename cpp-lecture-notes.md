@@ -375,3 +375,299 @@ int* arr = new int[5]; // виділення пам'яті для масиву
 delete p;              // звільнення пам'яті
 delete[] arr;          // звільнення пам'яті масиву
 ```
+## 9. Структури та об'єднання
+
+### 9.1 Структури (struct)
+- Користувацький тип даних, що об'єднує різні типи даних
+- Оголошення:
+```cpp
+struct Person {
+    string name;
+    int age;
+    double height;
+    
+    // Конструктор
+    Person(string n = "", int a = 0, double h = 0.0) 
+        : name(n), age(a), height(h) {}
+};
+```
+- Використання:
+```cpp
+Person p1;                           // створення об'єкта
+Person p2 = {"John", 25, 1.75};     // ініціалізація
+Person p3{"Alice", 30, 1.65};       // uniform initialization
+p1.name = "Bob";                    // доступ до полів
+```
+
+### 9.2 Об'єднання (union)
+- Тип даних, де всі члени використовують одну область пам'яті
+- Розмір об'єднання визначається найбільшим членом
+```cpp
+union Data {
+    int i;
+    float f;
+    char str[20];
+};
+```
+- Використання:
+```cpp
+Data data;
+data.i = 10;    // тепер можна використовувати тільки data.i
+data.f = 3.14;  // попереднє значення data.i втрачено
+```
+
+## 10. Робота з файлами
+
+### 10.1 Потоки введення-виведення
+- ifstream - для читання з файлу
+- ofstream - для запису у файл
+- fstream - для читання і запису
+
+### 10.2 Відкриття та закриття файлів
+```cpp
+#include <fstream>
+
+ofstream outFile("output.txt");              // створення/відкриття для запису
+ifstream inFile("input.txt");                // відкриття для читання
+fstream file("data.txt", ios::in | ios::out);// відкриття для читання і запису
+
+// Перевірка відкриття
+if (!inFile.is_open()) {
+    cerr << "Помилка відкриття файлу!" << endl;
+    return 1;
+}
+
+// Закриття файлу
+inFile.close();
+```
+
+### 10.3 Операції з файлами
+```cpp
+// Запис у файл
+ofstream outFile("output.txt");
+outFile << "Hello" << endl;
+outFile << 42 << endl;
+
+// Читання з файлу
+ifstream inFile("input.txt");
+string line;
+while (getline(inFile, line)) {
+    cout << line << endl;
+}
+
+// Читання форматованих даних
+int num;
+string str;
+inFile >> num >> str;
+
+// Позиціонування в файлі
+file.seekg(0, ios::beg);  // на початок файлу
+file.seekg(0, ios::end);  // в кінець файлу
+file.seekg(10, ios::cur); // відносне позиціонування
+```
+
+## 11. Перевантаження операторів
+
+### 11.1 Синтаксис перевантаження
+```cpp
+class Complex {
+    double re, im;
+public:
+    // Перевантаження оператора додавання
+    Complex operator+(const Complex& other) const {
+        return Complex(re + other.re, im + other.im);
+    }
+    
+    // Перевантаження оператора множення на число
+    Complex operator*(double value) const {
+        return Complex(re * value, im * value);
+    }
+    
+    // Перевантаження оператора виведення
+    friend ostream& operator<<(ostream& os, const Complex& c) {
+        os << c.re << "+" << c.im << "i";
+        return os;
+    }
+};
+```
+
+### 11.2 Правила перевантаження
+- Не можна змінювати пріоритет операторів
+- Не можна перевантажувати: ., ::, ?:, sizeof
+- Не можна створювати нові оператори
+- Принаймні один операнд має бути користувацького типу
+
+### 11.3 Часто перевантажувані оператори
+- Арифметичні: +, -, *, /
+- Порівняння: ==, !=, <, >, <=, >=
+- Присвоєння: =
+- Індексація: []
+- Виклик функції: ()
+- Перетворення типів: operator type()
+- Введення/виведення: >>, <<
+
+### 11.4 Приклад повного перевантаження
+```cpp
+class Vector {
+    int* arr;
+    int size;
+public:
+    // Конструктори
+    Vector(int s = 0) : size(s) {
+        arr = new int[size];
+    }
+    
+    // Перевантаження оператора індексації
+    int& operator[](int index) {
+        return arr[index];
+    }
+    
+    // Перевантаження присвоєння
+    Vector& operator=(const Vector& other) {
+        if (this != &other) {
+            delete[] arr;
+            size = other.size;
+            arr = new int[size];
+            for(int i = 0; i < size; i++)
+                arr[i] = other.arr[i];
+        }
+        return *this;
+    }
+    
+    // Деструктор
+    ~Vector() {
+        delete[] arr;
+    }
+};
+```
+## 12. Вектори
+
+### 12.1 Основні поняття
+- vector - динамічний масив, що автоматично змінює розмір
+- Знаходиться в бібліотеці <vector>
+- Зберігає елементи послідовно в пам'яті
+```cpp
+#include <vector>
+vector<тип> назва;  // загальний синтаксис
+vector<int> v1;     // пустий вектор
+vector<int> v2(5);  // вектор з 5 елементів зі значенням 0
+vector<int> v3(3, 7);// вектор з 3 елементів зі значенням 7
+vector<int> v4{1, 2, 3, 4, 5};  // ініціалізація значеннями
+```
+
+### 12.2 Основні методи
+```cpp
+vector<int> vec;
+vec.push_back(10);     // додати елемент в кінець
+vec.pop_back();        // видалити останній елемент
+vec.size();           // отримати розмір
+vec.empty();          // перевірка на пустоту
+vec.clear();          // очистити вектор
+vec.front();          // перший елемент
+vec.back();           // останній елемент
+vec.reserve(100);     // зарезервувати пам'ять
+vec.resize(5);        // змінити розмір
+vec.capacity();       // отримати ємність
+```
+
+### 12.3 Доступ до елементів
+```cpp
+vector<int> vec{1, 2, 3, 4, 5};
+vec[0];               // через оператор індексації (без перевірки)
+vec.at(0);            // через метод at() (з перевіркою)
+
+// Ітерація по вектору
+for(int i = 0; i < vec.size(); i++) {
+    cout << vec[i] << " ";
+}
+
+// Ітерація через ітератори
+for(auto it = vec.begin(); it != vec.end(); ++it) {
+    cout << *it << " ";
+}
+
+// Range-based for
+for(const auto& element : vec) {
+    cout << element << " ";
+}
+```
+
+### 12.4 Модифікація вектора
+```cpp
+vector<int> vec{1, 2, 3};
+
+// Вставка елементів
+vec.insert(vec.begin(), 0);     // вставка на початок
+vec.insert(vec.begin() + 2, 5); // вставка в середину
+
+// Видалення елементів
+vec.erase(vec.begin());         // видалення першого елемента
+vec.erase(vec.begin(), vec.begin() + 2); // видалення діапазону
+
+// Зміна розміру
+vec.resize(10);        // збільшення розміру (нові елементи = 0)
+vec.resize(2);         // зменшення розміру (зайві елементи видаляються)
+```
+
+### 12.5 Алгоритми з векторами
+```cpp
+#include <algorithm>
+vector<int> vec{3, 1, 4, 1, 5, 9, 2, 6};
+
+// Сортування
+sort(vec.begin(), vec.end());               // за зростанням
+sort(vec.rbegin(), vec.rend());            // за спаданням
+
+// Пошук
+auto it = find(vec.begin(), vec.end(), 5);  // пошук елемента
+auto it2 = lower_bound(vec.begin(), vec.end(), 4); // бінарний пошук
+
+// Підрахунок
+int count = count_if(vec.begin(), vec.end(), 
+    [](int x) { return x > 5; });           // кількість елементів > 5
+
+// Перетворення
+transform(vec.begin(), vec.end(), vec.begin(),
+    [](int x) { return x * 2; });           // множення всіх елементів на 2
+```
+
+### 12.6 Двовимірні вектори
+```cpp
+// Створення
+vector<vector<int>> matrix(3, vector<int>(4, 0));  // 3x4 матриця з нулів
+
+// Доступ до елементів
+matrix[0][0] = 1;  // зміна елемента
+int val = matrix[1][2];  // читання елемента
+
+// Додавання рядка
+matrix.push_back(vector<int>(4, 0));
+
+// Ітерація
+for(const auto& row : matrix) {
+    for(const auto& elem : row) {
+        cout << elem << " ";
+    }
+    cout << endl;
+}
+```
+
+### 12.7 Приклади використання
+```cpp
+// Видалення дублікатів
+vector<int> vec{1, 2, 2, 3, 3, 3, 4, 5, 5};
+sort(vec.begin(), vec.end());
+vec.erase(unique(vec.begin(), vec.end()), vec.end());
+
+// Об'єднання векторів
+vector<int> v1{1, 2, 3};
+vector<int> v2{4, 5, 6};
+v1.insert(v1.end(), v2.begin(), v2.end());
+
+// Реверс вектора
+reverse(vec.begin(), vec.end());
+
+// Знаходження мінімального/максимального елемента
+auto min_it = min_element(vec.begin(), vec.end());
+auto max_it = max_element(vec.begin(), vec.end());
+```
