@@ -671,3 +671,127 @@ reverse(vec.begin(), vec.end());
 auto min_it = min_element(vec.begin(), vec.end());
 auto max_it = max_element(vec.begin(), vec.end());
 ```
+## 13. Перерахування (Enumerations)
+
+### 13.1 Класичні перерахування (enum)
+- Тип даних, що складається з набору іменованих констант
+- За замовчуванням значення починаються з 0 і збільшуються на 1
+```cpp
+enum Color {
+    RED,    // 0
+    GREEN,  // 1
+    BLUE    // 2
+};
+
+// Явне задання значень
+enum Status {
+    ERROR = -1,
+    SUCCESS = 0,
+    PENDING = 1,
+    PROCESSING = 5
+};
+
+// Використання
+Color c = RED;
+Status s = SUCCESS;
+```
+
+### 13.2 Область видимості перерахувань
+- У класичних enum константи видимі в області оголошення
+```cpp
+enum Direction { UP, DOWN, LEFT, RIGHT };
+enum Movement { UP, FORWARD };  // Помилка! UP вже оголошено
+
+// Можна обійти через простір імен
+namespace Dir {
+    enum Direction { UP, DOWN, LEFT, RIGHT };
+}
+namespace Mov {
+    enum Movement { UP, FORWARD };
+}
+Dir::Direction d = Dir::UP;
+```
+
+### 13.3 Строго типізовані перерахування (enum class)
+- Безпечніші, ніж класичні enum
+- Не конвертуються неявно в int
+- Константи доступні тільки через ім'я enum
+```cpp
+enum class Month {
+    JANUARY = 1,
+    FEBRUARY,
+    MARCH,
+    APRIL,
+    MAY
+};
+
+// Використання
+Month m = Month::JANUARY;
+// int x = m;                 // Помилка! Немає неявного приведення
+int x = static_cast<int>(m);  // OK, явне приведення
+```
+
+### 13.4 Базовий тип перерахування
+- Можна явно вказати тип для зберігання значень
+```cpp
+enum SmallEnum : int8_t {
+    A, B, C
+};
+
+enum class BigEnum : uint64_t {
+    X = 1000000000000,
+    Y = 2000000000000
+};
+```
+
+### 13.5 Приклади використання
+```cpp
+// В switch
+enum class DayOfWeek {
+    MONDAY,
+    TUESDAY,
+    WEDNESDAY,
+    THURSDAY,
+    FRIDAY,
+    SATURDAY,
+    SUNDAY
+};
+
+void printDayType(DayOfWeek day) {
+    switch (day) {
+        case DayOfWeek::SATURDAY:
+        case DayOfWeek::SUNDAY:
+            cout << "Weekend";
+            break;
+        default:
+            cout << "Workday";
+    }
+}
+
+// Як прапори (flags)
+enum class Permissions : unsigned int {
+    NONE = 0,
+    READ = 1,
+    WRITE = 2,
+    EXECUTE = 4
+};
+
+// Використання побітових операцій
+Permissions p = static_cast<Permissions>(
+    static_cast<unsigned int>(Permissions::READ) |
+    static_cast<unsigned int>(Permissions::WRITE)
+);
+```
+
+### 13.6 Переваги enum class над звичайним enum
+1. Безпека типів
+2. Відсутність конфліктів імен
+3. Явне приведення типів
+4. Краща читабельність коду
+5. Можливість forward declaration
+
+### 13.7 Обмеження перерахувань
+- Неможливість додавати нові значення після оголошення
+- Неможливість ітерувати по значенням
+- Відсутність методів
+- Неможливість зберігати додаткові дані для кожного значення
